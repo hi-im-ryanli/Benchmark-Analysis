@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import random
 
 class FiananceAnalysis(object):
     """docstring for FiananceAnalysis"""
@@ -9,7 +10,15 @@ class FiananceAnalysis(object):
         self.date_column = "caldt"
         self.candidate_data = ["vwretd", "vwretx", "ewretd", "ewretx"]
 
-    def plot_return(self, df, columns, save=True, title='Return on $1 Investment'):
+    def boot_strap_se(self, returns, num_draws):
+        length = len(returns)
+        draws = np.zeros(num_draws)
+        for i in range(num_draws):
+            draws[i] = (np.cumprod(returns[random.choice(range(length)) for _ in xrange(length)] + 1)) ^ (1.0/length) - 1
+        sd = np.std(draws)
+        return sd / ((length)^(0.5))    
+
+    def plot_return(self, df, columns=["vwretd", "ewretd", "ewretd", "ewretx"], save=True, title='Return on $1 Investment'):
         '''
         plot the return if you invest in 1 dollar intially
         :param df: the dataframe containing the data
