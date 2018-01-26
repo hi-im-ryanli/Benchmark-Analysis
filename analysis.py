@@ -6,22 +6,30 @@ class FiananceAnalysis(object):
     """docstring for FiananceAnalysis"""
     def __init__(self):
         super(FiananceAnalysis, self).__init__()
+        self.date_column = "caldt"
 
-    @staticmethod
-    def plot_return(df, data=["vwretd+1", "ewretd+1", "ewretd+1", "ewretX+1"], save=True, title='Return on $1 Investment'):
-        x = df["Date"]
-        for idx in data:
+    def plot_return(self, df, columns=["vwretd", "ewretd", "ewretd", "ewretx"], save=True, title='Return on $1 Investment'):
+        '''
+        plot the return if you invest in 1 dollar intially
+        :param df: the dataframe containing the data
+        :param columns: the columns where the data holds
+        :param save: default True to save
+        :param title: the title for the saved graph
+        :return: None
+        '''
+        x = df[self.date_column]
+        for idx in columns:
             return_total = [1]
             for index, row in df.iterrows():
-                if pd.isnull(row["Return+1"]):
+                if pd.isnull(row[idx]):
                     return_total.append(return_total[-1])
                 else:
-                    return_total.append(return_total[-1] * row["Return+1"])
+                    return_total.append(return_total[-1] * (1 + row[idx]))
             # pop the first index out
             return_total.pop(0)
-            df = df.assign(total_return=return_total)
+            df[idx + "_return"] = return_total
 
-        df.plot(x=df["Date"], y=data, gird=True)
+        df.plot(x=x, y=[d + "_return" for d in columns])
         plt.title(title)
         plt.xlabel("Years")
         plt.ylabel("Cumulative Annualized Return")
@@ -30,14 +38,14 @@ class FiananceAnalysis(object):
             plt.savefig(title+".png", dpi=300)
 
 
-indexes = ["DJIA", "S&P500", "NASDAQ", "NYSE_AMEX", "NYSE_AMEX_NASDAQ", "Russell20003000"]
-df = pd.read_excel("data.xlsx", sheetname=indexes, header=0)
+indexes = ["DJIA", "S&P500", "NASDAQ", "NYSE_AMEX", "NYSE_AMEX_NASDAQ", "R2000", "R3000"]
+df = pd.read_excel("clean_data.xlsx", sheetname=indexes, header=0)
 for idx in indexes:
     df[idx].dropna(axis=1, inplace=True, how='all')
 
 
 
 print(df.keys())
-print(df["DJIA"])
+print(df["S&P500"])
 f = FiananceAnalysis()
-f.plot_return(df["DJIA"])
+f.plot_return(df["S&P500"])
