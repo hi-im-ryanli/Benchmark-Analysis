@@ -10,7 +10,17 @@ class FiananceAnalysis(object):
         self.date_column = "caldt"
         self.candidate_data = ["vwretd", "vwretx", "ewretd", "ewretx"]
 
-    def plot_return(self, df, columns, save=True, title='Return on $1 Investment'):
+    def boot_strap_se(self, returns, num_draws):
+        length = len(returns)
+        draws = np.zeros(num_draws)
+        for i in range(num_draws):
+            randoms = [random.choice(range(length)) for shabi in xrange(length)]
+            draws[i] = (np.cumprod(returns[randoms] + 1))[-1] ** (1.0/length) - 1
+        sd = np.std(draws)
+        print(sd)
+        return sd / ((num_draws)**(0.5))    
+
+    def plot_return(self, df, columns=["vwretd", "ewretd", "ewretd", "ewretx"], save=True, title='Return on $1 Investment'):
         '''
         plot the return if you invest in 1 dollar intially
         :param df: the dataframe containing the data
@@ -51,6 +61,13 @@ class FiananceAnalysis(object):
         df.plot.hist(alpha=0.3, bins=50, grid=True, ax=axes[1], title="Histogram of Yearly Returns")
         if save:
             plt.savefig("distribution_analysis.png", dpi=300)
+
+    def plot(self):
+        for idx in indexes:
+            tempdf = df[idx]
+            available_column = [c for c in f.candidate_data if c in tempdf.columns]
+
+            f.plot_return(tempdf, available_column, title='Return on $1 Investment on ' + idx)
 
     def horz_return_plot(self, df, save=True):
         notime_df = df.drop("caldt", axis=1)
@@ -106,3 +123,6 @@ f.distribution_plot(df_horizontal.drop("caldt", axis=1))
 
 # # compare horizontally of all the returns
 f.horz_return_plot(df_horizontal)
+
+#print(np.array(df["DJIA"]["ewretx"]))
+#print(f.boot_strap_se(np.array(df["DJIA"]["ewretx"]), 5000))
