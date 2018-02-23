@@ -10,6 +10,5 @@ that period. Then we take the Nth root of that figure and subtract 1 from the su
 the period length in years.
 
 # Results
-![alt text](Return on $1 Investment on DJIA.png)
 ![alt text](distribution_analysis.png)
 ![alt text](horz_return.png)
